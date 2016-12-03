@@ -6,7 +6,8 @@
 #define WAIT_TIME 50
 #define GROWTH 10
 #define MAX_FOOD 10
-#define NO_DEATH TRUE
+#define CAN_CROWL_ON_HIM TRUE
+#define CAN_GO_THROUGH_BORDER TRUE 
 
 WINDOW *gWGame, *gWStats;
 typedef enum {UP, DOWN, LEFT, RIGHT} t_dir;
@@ -182,13 +183,19 @@ int main(void) {
 		listPtr_removeElt ();
 		listPtr_appendHead (prev);
 		
-		if (head.line >= LINES - 3 - 1) head.line = 1;
-		else if (head.line <= 0) head.line = LINES - 3 - 2;
+		if (head.line >= LINES - 3 - 1 || head.line <= 0 || head.col >= COLS - 1 || head.col <= 0) {
+			if (CAN_GO_THROUGH_BORDER == FALSE) continueGame = FALSE;
+			else {
+				if (head.line >= LINES - 3 - 1) head.line = 1;
+				else if (head.line <= 0) head.line = LINES - 3 - 2;
+				
+				if (head.col >= COLS - 1) head.col = 1;
+				else if (head.col <= 0) head.col = COLS - 2;
+			}
+		}
 		
-		if (head.col >= COLS - 1) head.col = 1;
-		else if (head.col <= 0) head.col = COLS - 2;
 		
-		if (listPtr_isInList(head) && NO_DEATH == FALSE) continueGame = FALSE;
+		if (listPtr_isInList(head) && CAN_CROWL_ON_HIM == FALSE) continueGame = FALSE;
 		else {
 			listPtr_appendHead (head);
 			if (eat(head, foods, foodQtt, &foodEat, &growth) && foodQtt + 1 < MAX_FOOD) {
