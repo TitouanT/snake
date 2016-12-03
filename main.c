@@ -166,13 +166,13 @@ int main(void) {
 			else prev.body = HORIZONTAL;
 		}
 		else {
-			if (prevDir == UP && currDir == RIGHT || prevDir == LEFT && currDir == DOWN)
+			if ((prevDir == UP && currDir == RIGHT) || (prevDir == LEFT && currDir == DOWN))
 				prev.body = TOP_LEFT;
 				
-			else if (prevDir == UP && currDir == LEFT || prevDir == RIGHT && currDir == DOWN)
+			else if ((prevDir == UP && currDir == LEFT) || (prevDir == RIGHT && currDir == DOWN))
 				prev.body = TOP_RIGHT;
 				
-			else if (prevDir == DOWN && currDir == RIGHT || prevDir == LEFT && currDir == UP)
+			else if ((prevDir == DOWN && currDir == RIGHT) || (prevDir == LEFT && currDir == UP))
 				prev.body = BOTTOM_LEFT;
 				
 			else
