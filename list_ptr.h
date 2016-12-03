@@ -15,7 +15,7 @@ void listPtr_appendLeft (t_pos data);
 void listPtr_appendRight (t_pos data);
 void listPtr_init (void);
 int  listPtr_isEmpty (void);
-int  listPtr_isInList (t_pos data);    // !ok, you have to code it !
+int  listPtr_isInList (t_pos data); 
 int  listPtr_isOut (void);
 void listPtr_move2end (void);
 void listPtr_move2head (void);
