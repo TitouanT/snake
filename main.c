@@ -3,12 +3,14 @@
 #include <time.h>
 #include "list_ptr.h"
 #define WAIT_TIME 50
+#define GROWTH 5
 
 WINDOW *gWGame, *gWStats;
 typedef enum {UP, DOWN, LEFT, RIGHT} t_dir;
 
 
 void initGame () {
+	srand(time(NULL));
 	initscr();
 	timeout(WAIT_TIME); // if no no input then dont block
 	//cbreak();
@@ -50,8 +52,8 @@ void displaySnake(int isAlive, int eraseMode) {
 		mvwprintw(gWGame, pos.line, pos.col, "!");
 }
 
-void displayStats(int score) {
-	mvwprintw(gWStats, 1, 1, "score: %d", score);
+void displayStats(int foodEat, int length) {
+	mvwprintw(gWStats, 1, 1, "foodEat: %d, length: %d", foodEat, length);
 	wrefresh(gWStats);
 }
 
@@ -60,8 +62,8 @@ void displayFood(t_pos food) {
 }
 
 void randomFood(t_pos * food) {
-	food -> line = rand()%(LINES - 3 - 1) + 1;
-	food -> col = rand()%(COLS - 1) + 1;
+	food -> line = rand()%(LINES - 3 - 2) + 1;
+	food -> col = rand()%(COLS - 2) + 1;
 }
 
 int eat(t_pos head, t_pos food) {
@@ -70,14 +72,17 @@ int eat(t_pos head, t_pos food) {
 
 int main(void) {
 	int key = -1;
-	int score = 0;
+	int foodEat = 0;
+	int length = 1;
+	int growth = 0;
 	t_dir currDir = RIGHT;
 	int continueGame = TRUE;
 	t_pos head = {1, 1};
 	t_pos food;
-	randomFood(&food);
 	
 	initGame();
+	randomFood(&food);
+	
 	listPtr_init ();
 	listPtr_appendHead (head);
 	
@@ -127,21 +132,26 @@ int main(void) {
 		else {
 			listPtr_appendHead (head);
 			if (eat(head, food)) {
-				score++;
+				foodEat++;
 				randomFood(&food);
+				growth+=5;
 			}
-			else {
+			if (growth == 0) {
 				listPtr_move2end ();
 				listPtr_removeElt ();
+			}
+			else {
+				growth--;
+				length++;
 			}
 			
 			displayFood(food);
 			
-			displaySnake(TRUE, FALSE);
+			displaySnake(continueGame, FALSE);
 			wrefresh(gWGame);
-			displaySnake(TRUE, TRUE);
+			displaySnake(continueGame, TRUE);
 			
-			displayStats(score);
+			displayStats(foodEat, length);
 		}
 		
 		// mvwprintw(gWGame, head.line, head.col, "#");
@@ -150,12 +160,12 @@ int main(void) {
 	}
 	
 	listPtr_appendHead (head);
-	displaySnake(FALSE, FALSE);
+	displaySnake(continueGame, FALSE);
 	wrefresh(gWGame);
 	
 	listPtr_removeList ();
 	
-	displayStats(score);
+	displayStats(foodEat, length);
 	
 	timeout(-1);
 	getch();
