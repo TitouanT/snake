@@ -12,8 +12,8 @@
 #define WAIT_TIME 50                // the time to wait for a user input
 #define GROWTH 10                   // length's gain when one food is eat
 #define MAX_FOOD 10                 // Maximum food quantity in the game at the same time 
-#define CAN_CROWL_ON_HIM FALSE      // obvious
-#define CAN_GO_THROUGH_BORDER FALSE // "
+#define CAN_CROWL_ON_HIM TRUE       // obvious
+#define CAN_GO_THROUGH_BORDER TRUE  // "
 
 WINDOW *gWGame, *gWStats;
 typedef enum {UP, DOWN, LEFT, RIGHT} t_dir;
@@ -36,8 +36,8 @@ void initGame () {
 	box(gWGame, ACS_VLINE, ACS_HLINE);
 	box(gWStats, ACS_VLINE, ACS_HLINE);
 
-	mvwprintw(gWGame, 0, 1, "Snake IT!");
-	mvwprintw(gWStats, 0, 1, "Stats");
+	mvwprintw(gWGame, 0, 1, " Snake IT! --- <> with ♥ by TT --- ");
+	mvwprintw(gWStats, 0, 1, " Stats ");
 
 	wrefresh(gWGame);
 	wrefresh(gWStats);
@@ -87,7 +87,7 @@ void displayStats(int foodEat, int length, int foodQtt) {
 void displayFood(t_pos * foods, int foodQtt) {
 	int i;
 	for (i = 0; i < foodQtt; i++) {
-		mvwprintw(gWGame, foods[i].line, foods[i].col, "%c", '%');
+		mvwprintw(gWGame, foods[i].line, foods[i].col, "⚡");//"◉");
 	}
 	
 }
