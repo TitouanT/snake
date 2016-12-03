@@ -6,6 +6,7 @@
 #define WAIT_TIME 50
 #define GROWTH 10
 #define MAX_FOOD 10
+#define NO_DEATH TRUE
 
 WINDOW *gWGame, *gWStats;
 typedef enum {UP, DOWN, LEFT, RIGHT} t_dir;
@@ -82,7 +83,7 @@ void displayStats(int foodEat, int length, int foodQtt) {
 void displayFood(t_pos * foods, int foodQtt) {
 	int i;
 	for (i = 0; i < foodQtt; i++) {
-		mvwprintw(gWGame, foods[i].line, foods[i].col, "F");
+		mvwprintw(gWGame, foods[i].line, foods[i].col, "%c", '%');
 	}
 	
 }
@@ -187,7 +188,7 @@ int main(void) {
 		if (head.col >= COLS - 1) head.col = 1;
 		else if (head.col <= 0) head.col = COLS - 2;
 		
-		if (listPtr_isInList(head)) continueGame = FALSE;
+		if (listPtr_isInList(head) && NO_DEATH == FALSE) continueGame = FALSE;
 		else {
 			listPtr_appendHead (head);
 			if (eat(head, foods, foodQtt, &foodEat, &growth) && foodQtt + 1 < MAX_FOOD) {
