@@ -6,8 +6,8 @@
 #define WAIT_TIME 50
 #define GROWTH 10
 #define MAX_FOOD 10
-#define CAN_CROWL_ON_HIM TRUE
-#define CAN_GO_THROUGH_BORDER TRUE 
+#define CAN_CROWL_ON_HIM FALSE
+#define CAN_GO_THROUGH_BORDER FALSE 
 
 WINDOW *gWGame, *gWStats;
 typedef enum {UP, DOWN, LEFT, RIGHT} t_dir;
@@ -39,45 +39,39 @@ void initGame () {
 	
 }
 
-void displaySnake(int isAlive, int eraseMode, int currDir) {
+void displaySnake (int isAlive, int currDir) {
 	t_pos pos;
 	
+	
 	listPtr_move2head();
+	listPtr_next ();
 	while (!listPtr_isOut ()) {
 		listPtr_readData (&pos);
-		if (eraseMode) mvwprintw(gWGame, pos.line, pos.col, " ");
-		else {
-			switch (pos.body) {
-				case HORIZONTAL:   mvwprintw(gWGame, pos.line, pos.col, "═"); break;
-				case VERTICAL:     mvwprintw(gWGame, pos.line, pos.col, "║"); break;
-				case TOP_LEFT:     mvwprintw(gWGame, pos.line, pos.col, "╔"); break;
-				case TOP_RIGHT:    mvwprintw(gWGame, pos.line, pos.col, "╗"); break;
-				case BOTTOM_LEFT:  mvwprintw(gWGame, pos.line, pos.col, "╚"); break;
-				case BOTTOM_RIGHT: mvwprintw(gWGame, pos.line, pos.col, "╝"); break;
-			}
+		switch (pos.body) {
+			case HORIZONTAL:   mvwprintw(gWGame, pos.line, pos.col, "═"); break;
+			case VERTICAL:     mvwprintw(gWGame, pos.line, pos.col, "║"); break;
+			case TOP_LEFT:     mvwprintw(gWGame, pos.line, pos.col, "╔"); break;
+			case TOP_RIGHT:    mvwprintw(gWGame, pos.line, pos.col, "╗"); break;
+			case BOTTOM_LEFT:  mvwprintw(gWGame, pos.line, pos.col, "╚"); break;
+			case BOTTOM_RIGHT: mvwprintw(gWGame, pos.line, pos.col, "╝"); break;
 		}
-		listPtr_next ();
+		listPtr_next();
 	}
-	
 	listPtr_move2head();
 	listPtr_readData (&pos);
 	if (isAlive) {
-		if (eraseMode) mvwprintw(gWGame, pos.line, pos.col, " ");
-		else {
-			switch (currDir) {
-				case UP: mvwprintw(gWGame, pos.line, pos.col, "^"); break;
-				case DOWN: mvwprintw(gWGame, pos.line, pos.col, "v"); break;
-				case RIGHT: mvwprintw(gWGame, pos.line, pos.col, ">"); break;
-				case LEFT: mvwprintw(gWGame, pos.line, pos.col, "<"); break;
-			}
+		switch (currDir) {
+			case UP:    mvwprintw(gWGame, pos.line, pos.col, "^"); break;
+			case DOWN:  mvwprintw(gWGame, pos.line, pos.col, "v"); break;
+			case RIGHT: mvwprintw(gWGame, pos.line, pos.col, ">"); break;
+			case LEFT:  mvwprintw(gWGame, pos.line, pos.col, "<"); break;
 		}
 	}
-	else
-		mvwprintw(gWGame, pos.line, pos.col, "!");
+	else mvwprintw(gWGame, pos.line, pos.col, "!");
 }
 
 void displayStats(int foodEat, int length, int foodQtt) {
-	mvwprintw(gWStats, 1, 1, "foodEat: %d, length: %d, foodQtt: %d", foodEat, length, foodQtt);
+	mvwprintw(gWStats, 1, 1, "foodEat: %d, length: %d, foodQtt: %d, you can%s eat yourself %s you can%s go throw the wall", foodEat, length, foodQtt, CAN_CROWL_ON_HIM ? "" : "'t",(CAN_CROWL_ON_HIM == CAN_GO_THROUGH_BORDER) ? "and" : "but", CAN_GO_THROUGH_BORDER ? "" : "'t");
 	wrefresh(gWStats);
 }
 
@@ -115,7 +109,7 @@ int main(void) {
 	int foodQtt = 1;
 	t_dir currDir = RIGHT, prevDir;
 	int continueGame = TRUE;
-	t_pos head = {1, 1, HORIZONTAL}, prev;
+	t_pos head = {1, 1, HORIZONTAL}, prev, end;
 	t_pos foods[MAX_FOOD];
 	
 	initGame();
@@ -205,6 +199,8 @@ int main(void) {
 			
 			if (growth == 0) {
 				listPtr_move2end ();
+				listPtr_readData(&end);
+				mvwprintw(gWGame, end.line, end.col, " ");
 				listPtr_removeElt ();
 			}
 			else {
@@ -214,16 +210,17 @@ int main(void) {
 			
 			displayFood(foods, foodQtt);
 			
-			displaySnake(continueGame, FALSE, currDir);
+			//displaySnake(continueGame, FALSE, currDir);
+			displaySnake(continueGame, currDir);
 			wrefresh(gWGame);
-			displaySnake(continueGame, TRUE, currDir);
+			//displaySnake(continueGame, TRUE, currDir);
 			
 			displayStats(foodEat, length, foodQtt);
 		}
 	}
 	
 	listPtr_appendHead (head);
-	displaySnake(continueGame, FALSE, currDir);
+	displaySnake(continueGame, currDir);
 	wrefresh(gWGame);
 	
 	listPtr_removeList ();
@@ -231,7 +228,10 @@ int main(void) {
 	displayStats(foodEat, length, foodQtt);
 	
 	timeout(-1);
-	getch();
+	if (key != 'q') {
+		do key = getch();
+		while (key != 'q');
+	}
 	
 	endwin();
 	delwin(gWGame);
