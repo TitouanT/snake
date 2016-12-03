@@ -35,7 +35,7 @@ void initGame () {
 	
 }
 
-void displaySnake(int isAlive, int eraseMode) {
+void displaySnake(int isAlive, int eraseMode, int currDir) {
 	t_pos pos;
 	
 	listPtr_move2head();
@@ -47,8 +47,17 @@ void displaySnake(int isAlive, int eraseMode) {
 	
 	listPtr_move2head();
 	listPtr_readData (&pos);
-	if (isAlive)
-		mvwprintw(gWGame, pos.line, pos.col, "%c", eraseMode ? ' ' : '@');
+	if (isAlive) {
+		if (eraseMode) mvwprintw(gWGame, pos.line, pos.col, "%c", ' ');
+		else {
+			switch (currDir) {
+				case UP: mvwprintw(gWGame, pos.line, pos.col, "^"); break;
+				case DOWN: mvwprintw(gWGame, pos.line, pos.col, "v"); break;
+				case RIGHT: mvwprintw(gWGame, pos.line, pos.col, ">"); break;
+				case LEFT: mvwprintw(gWGame, pos.line, pos.col, "<"); break;
+			}
+		}
+	}
 	else
 		mvwprintw(gWGame, pos.line, pos.col, "!");
 }
@@ -162,16 +171,16 @@ int main(void) {
 			
 			displayFood(foods, foodQtt);
 			
-			displaySnake(continueGame, FALSE);
+			displaySnake(continueGame, FALSE, currDir);
 			wrefresh(gWGame);
-			displaySnake(continueGame, TRUE);
+			displaySnake(continueGame, TRUE, currDir);
 			
 			displayStats(foodEat, length, foodQtt);
 		}
 	}
 	
 	listPtr_appendHead (head);
-	displaySnake(continueGame, FALSE);
+	displaySnake(continueGame, FALSE, currDir);
 	wrefresh(gWGame);
 	
 	listPtr_removeList ();
