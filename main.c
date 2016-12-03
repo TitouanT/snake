@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include <time.h>
+#include <locale.h>
 #include "list_ptr.h"
 #define WAIT_TIME 50
 #define GROWTH 10
@@ -12,6 +13,7 @@ typedef enum {UP, DOWN, LEFT, RIGHT} t_dir;
 
 void initGame () {
 	srand(time(NULL));
+	setlocale(LC_ALL, "");
 	initscr();
 	timeout(WAIT_TIME); // if no no input then dont block
 	//cbreak();
@@ -41,14 +43,24 @@ void displaySnake(int isAlive, int eraseMode, int currDir) {
 	listPtr_move2head();
 	while (!listPtr_isOut ()) {
 		listPtr_readData (&pos);
-		mvwprintw(gWGame, pos.line, pos.col, "%c", eraseMode ? ' ' : '#');
+		if (eraseMode) mvwprintw(gWGame, pos.line, pos.col, " ");
+		else {
+			switch (pos.body) {
+				case HORIZONTAL:   mvwprintw(gWGame, pos.line, pos.col, "═"); break;
+				case VERTICAL:     mvwprintw(gWGame, pos.line, pos.col, "║"); break;
+				case TOP_LEFT:     mvwprintw(gWGame, pos.line, pos.col, "╔"); break;
+				case TOP_RIGHT:    mvwprintw(gWGame, pos.line, pos.col, "╗"); break;
+				case BOTTOM_LEFT:  mvwprintw(gWGame, pos.line, pos.col, "╚"); break;
+				case BOTTOM_RIGHT: mvwprintw(gWGame, pos.line, pos.col, "╝"); break;
+			}
+		}
 		listPtr_next ();
 	}
 	
 	listPtr_move2head();
 	listPtr_readData (&pos);
 	if (isAlive) {
-		if (eraseMode) mvwprintw(gWGame, pos.line, pos.col, "%c", ' ');
+		if (eraseMode) mvwprintw(gWGame, pos.line, pos.col, " ");
 		else {
 			switch (currDir) {
 				case UP: mvwprintw(gWGame, pos.line, pos.col, "^"); break;
@@ -99,9 +111,9 @@ int main(void) {
 	int length = 1;
 	int growth = 0;
 	int foodQtt = 1;
-	t_dir currDir = RIGHT;
+	t_dir currDir = RIGHT, prevDir;
 	int continueGame = TRUE;
-	t_pos head = {1, 1};
+	t_pos head = {1, 1, HORIZONTAL}, prev;
 	t_pos foods[MAX_FOOD];
 	
 	initGame();
@@ -112,6 +124,7 @@ int main(void) {
 	
 	while (continueGame) {
 		key = getch();
+		prevDir = currDir;
 		switch (key) {
 			case 'q':
 				continueGame = FALSE; break;
@@ -138,6 +151,7 @@ int main(void) {
 		
 		listPtr_move2head();
 		listPtr_readData (&head);
+		prev = head;
 		
 		switch (currDir) {
 			case UP: head.line --; break;
@@ -145,6 +159,27 @@ int main(void) {
 			case RIGHT: head.col ++; break;
 			case LEFT: head.col --; break;
 		}
+		
+		if (prevDir == currDir) {
+			if (currDir == UP || currDir == DOWN) prev.body = VERTICAL;
+			else prev.body = HORIZONTAL;
+		}
+		else {
+			if (prevDir == UP && currDir == RIGHT || prevDir == LEFT && currDir == DOWN)
+				prev.body = TOP_LEFT;
+				
+			else if (prevDir == UP && currDir == LEFT || prevDir == RIGHT && currDir == DOWN)
+				prev.body = TOP_RIGHT;
+				
+			else if (prevDir == DOWN && currDir == RIGHT || prevDir == LEFT && currDir == UP)
+				prev.body = BOTTOM_LEFT;
+				
+			else
+				prev.body = BOTTOM_RIGHT;
+		}
+		listPtr_move2head();
+		listPtr_removeElt ();
+		listPtr_appendHead (prev);
 		
 		if (head.line >= LINES - 3 - 1) head.line = 1;
 		else if (head.line <= 0) head.line = LINES - 3 - 2;

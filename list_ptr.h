@@ -4,8 +4,10 @@
 #define LIST_PTR_H
 
 
+typedef enum {HORIZONTAL, VERTICAL, TOP_RIGHT, TOP_LEFT, BOTTOM_RIGHT, BOTTOM_LEFT} t_body;
 typedef struct {
 	int line, col;
+	t_body body;
 } t_pos;
 
 
