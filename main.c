@@ -3,7 +3,8 @@
 #include <time.h>
 #include "list_ptr.h"
 #define WAIT_TIME 50
-#define GROWTH 5
+#define GROWTH 10
+#define MAX_FOOD 10
 
 WINDOW *gWGame, *gWStats;
 typedef enum {UP, DOWN, LEFT, RIGHT} t_dir;
@@ -52,22 +53,35 @@ void displaySnake(int isAlive, int eraseMode) {
 		mvwprintw(gWGame, pos.line, pos.col, "!");
 }
 
-void displayStats(int foodEat, int length) {
-	mvwprintw(gWStats, 1, 1, "foodEat: %d, length: %d", foodEat, length);
+void displayStats(int foodEat, int length, int foodQtt) {
+	mvwprintw(gWStats, 1, 1, "foodEat: %d, length: %d, foodQtt: %d", foodEat, length, foodQtt);
 	wrefresh(gWStats);
 }
 
-void displayFood(t_pos food) {
-	mvwprintw(gWGame, food.line, food.col, "F");
+void displayFood(t_pos * foods, int foodQtt) {
+	int i;
+	for (i = 0; i < foodQtt; i++) {
+		mvwprintw(gWGame, foods[i].line, foods[i].col, "F");
+	}
+	
 }
 
-void randomFood(t_pos * food) {
-	food -> line = rand()%(LINES - 3 - 2) + 1;
-	food -> col = rand()%(COLS - 2) + 1;
+void randomFood(t_pos * foods, int i) {
+	foods[i].line = rand()%(LINES - 3 - 2) + 1;
+	foods[i].col  = rand()%(COLS - 2) + 1;
 }
 
-int eat(t_pos head, t_pos food) {
-	return (head.line == food.line && head.col == food.col);
+int eat(t_pos head, t_pos * foods, int foodQtt, int * foodEat, int * growth) {
+	int i, eatSometh = FALSE;
+	for (i = 0; i < foodQtt; i++) {
+		if (head.line == foods[i].line && head.col == foods[i].col) {
+			randomFood(foods, i);
+			eatSometh = TRUE;
+			(*foodEat)++;
+			(*growth)+=GROWTH;
+		}
+	}
+	return eatSometh;
 }
 
 int main(void) {
@@ -75,13 +89,14 @@ int main(void) {
 	int foodEat = 0;
 	int length = 1;
 	int growth = 0;
+	int foodQtt = 1;
 	t_dir currDir = RIGHT;
 	int continueGame = TRUE;
 	t_pos head = {1, 1};
-	t_pos food;
+	t_pos foods[MAX_FOOD];
 	
 	initGame();
-	randomFood(&food);
+	randomFood(foods, 0);
 	
 	listPtr_init ();
 	listPtr_appendHead (head);
@@ -131,11 +146,11 @@ int main(void) {
 		if (listPtr_isInList(head)) continueGame = FALSE;
 		else {
 			listPtr_appendHead (head);
-			if (eat(head, food)) {
-				foodEat++;
-				randomFood(&food);
-				growth+=5;
+			if (eat(head, foods, foodQtt, &foodEat, &growth) && foodQtt + 1 < MAX_FOOD) {
+				randomFood(foods, foodQtt);
+				foodQtt++;
 			}
+			
 			if (growth == 0) {
 				listPtr_move2end ();
 				listPtr_removeElt ();
@@ -145,18 +160,14 @@ int main(void) {
 				length++;
 			}
 			
-			displayFood(food);
+			displayFood(foods, foodQtt);
 			
 			displaySnake(continueGame, FALSE);
 			wrefresh(gWGame);
 			displaySnake(continueGame, TRUE);
 			
-			displayStats(foodEat, length);
+			displayStats(foodEat, length, foodQtt);
 		}
-		
-		// mvwprintw(gWGame, head.line, head.col, "#");
-		// wrefresh(gWGame);
-		// mvwprintw(gWGame, head.line, head.col, " ");
 	}
 	
 	listPtr_appendHead (head);
@@ -165,7 +176,7 @@ int main(void) {
 	
 	listPtr_removeList ();
 	
-	displayStats(foodEat, length);
+	displayStats(foodEat, length, foodQtt);
 	
 	timeout(-1);
 	getch();
