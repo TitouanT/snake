@@ -1,5 +1,8 @@
 CC = gcc
+LIB = $(shell pkg-config --libs ncursesw 2>/dev/null)
+ifeq ($(LIB),)
 LIB = -lncurses
+endif
 
 snake: main.o list_ptr.o
 	$(CC) $^ -o $@ $(LIB) -Wall
