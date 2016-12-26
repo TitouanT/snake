@@ -92,7 +92,7 @@ void displaySnake (int isAlive, int currDir) {
 
 // display some information about the game
 void displayStats(int foodEat, int length, int foodQtt) {
-	mvwprintw(gWStats, 1, 1, "foodEat: %d, length: %d, foodQtt: %d, cannibalism(c): %s, ghost(g): %s | 'q' to quit | 'r' to replay", foodEat, length, foodQtt, CAN_CROWL_ON_HIM ? "YES" : "NO", CAN_GO_THROUGH_BORDER ? "YES" : "NO");
+	mvwprintw(gWStats, 1, 1, "foodEat: %d, length: %d, foodQtt: %d, cannibalism(c): %3s, ghost(g): %3s | 'q' to quit | 'r' to replay", foodEat, length, foodQtt, CAN_CROWL_ON_HIM ? "YES" : "NO", CAN_GO_THROUGH_BORDER ? "YES" : "NO");
 	wrefresh(gWStats);
 }
 
