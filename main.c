@@ -244,18 +244,22 @@ int snake(void) {
 				break;
 			
 			// the player can't go to the opposite direction
+			case 'k':
 			case KEY_UP: // go up
 				if (currDir != DOWN) currDir = UP;
 				break;
 				
+			case 'j':
 			case KEY_DOWN: // go down
 				if (currDir != UP) currDir = DOWN;
 				break;
 				
+			case 'h':
 			case KEY_LEFT: // go left
 				if (currDir != RIGHT) currDir = LEFT;
 				break;
 				
+			case 'l':
 			case KEY_RIGHT: // go right
 				if (currDir != LEFT) currDir = RIGHT;
 				break;
